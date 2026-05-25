@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>轻量级日历</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <div class="container">
+        <!-- 头部导航区 -->
+        <header class="header">
+            <div class="header-left">
+                <h1 class="title">📅 轻量级日历</h1>
+            </div>
+            <div class="header-center">
+                <div class="week-navigator">
+                    <button id="prevWeek" class="nav-btn" title="上一周">←</button>
+                    <div class="current-week-display">
+                        <span id="currentWeekLabel">第 21 周</span>
+                        <span id="currentWeekRange">2026-05-25 ~ 2026-05-31</span>
+                    </div>
+                    <button id="nextWeek" class="nav-btn" title="下一周">→</button>
+                    <button id="todayBtn" class="today-btn" title="回到今天">今天</button>
+                </div>
+            </div>
+            <div class="header-right">
+                <div class="current-time">
+                    <span id="currentTime">13:52:00</span>
+                </div>
+            </div>
+        </header>
+
+        <!-- 周备忘录区域 -->
+        <section class="weekly-memo-section">
+            <div class="memo-header">
+                <h2>📝 本周备忘录</h2>
+                <button id="editWeeklyMemo" class="edit-btn">编辑</button>
+            </div>
+            <div id="weeklyMemoDisplay" class="memo-content">
+                <p class="placeholder-text">点击"编辑"添加本周备忘录...</p>
+            </div>
+        </section>
+
+        <!-- 日历网格区域 -->
+        <main class="calendar-grid" id="calendarGrid">
+            <!-- 星期标题 -->
+            <div class="weekday-header">周日</div>
+            <div class="weekday-header">周一</div>
+            <div class="weekday-header">周二</div>
+            <div class="weekday-header">周三</div>
+            <div class="weekday-header">周四</div>
+            <div class="weekday-header">周五</div>
+            <div class="weekday-header">周六</div>
+            
+            <!-- 日期格子将由 JavaScript 动态生成 -->
+        </main>
+
+        <!-- 底部信息栏 -->
+        <footer class="footer">
+            <p>💡 点击任意日期添加或查看备忘录</p>
+        </footer>
+    </div>
+
+    <!-- 备忘录编辑模态框 -->
+    <div id="memoModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="modalTitle">编辑备忘录</h3>
+                <button id="closeModal" class="close-btn">&times;</button>
+            </div>
+            <div class="modal-body">
+                <textarea id="memoInput" placeholder="在此输入备忘录内容..." rows="8"></textarea>
+                <div class="memo-info">
+                    <small>内容将自动保存到本地存储</small>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button id="deleteMemo" class="delete-btn">删除</button>
+                <button id="cancelBtn" class="cancel-btn">取消</button>
+                <button id="saveBtn" class="save-btn">保存</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 周备忘录编辑模态框 -->
+    <div id="weeklyMemoModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>编辑本周备忘录</h3>
+                <button id="closeWeeklyModal" class="close-btn">&times;</button>
+            </div>
+            <div class="modal-body">
+                <textarea id="weeklyMemoInput" placeholder="在此输入本周备忘录..." rows="8"></textarea>
+                <div class="memo-info">
+                    <small>内容将自动保存到本地存储</small>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button id="deleteWeeklyMemo" class="delete-btn">删除</button>
+                <button id="cancelWeeklyBtn" class="cancel-btn">取消</button>
+                <button id="saveWeeklyBtn" class="save-btn">保存</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/utils.js"></script>
+    <script src="js/memo.js"></script>
+    <script src="js/calendar.js"></script>
+    <script src="js/app.js"></script>
+</body>
+</html>
