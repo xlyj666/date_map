@@ -18,6 +18,9 @@ function initApp() {
     // 初始化备忘录管理器
     MemoManager.init();
 
+    // 初始化计划管理器
+    PlanManager.init();
+
     // 初始化日历引擎
     const calendarGrid = document.getElementById('calendarGrid');
     CalendarEngine.init(calendarGrid, handleDayClick);
@@ -53,19 +56,25 @@ function initApp() {
 function handleDayClick(date) {
     selectedDate = date;
     const dateKey = Utils.formatDate(date);
-    const memo = MemoManager.getDailyMemo(dateKey);
+    const mode = MemoManager.getDailyMode(dateKey);
     
-    // 设置模态框标题
-    const modalTitle = document.getElementById('modalTitle');
-    modalTitle.textContent = `${Utils.formatDate(date)} ${Utils.getWeekdayName(date)} - 备忘录`;
-    
-    // 设置输入框内容
-    const memoInput = document.getElementById('memoInput');
-    memoInput.value = memo || '';
-    
-    // 显示模态框
-    memoModal.classList.add('active');
-    memoInput.focus();
+    // 根据模式打开不同的编辑器
+    if (mode === 'plan') {
+        PlanManager.openDailyPlan(date);
+    } else {
+        // 设置模态框标题
+        const modalTitle = document.getElementById('modalTitle');
+        modalTitle.textContent = `${Utils.formatDate(date)} ${Utils.getWeekdayName(date)} - 备忘录`;
+        
+        // 设置输入框内容
+        const memoInput = document.getElementById('memoInput');
+        const memo = MemoManager.getDailyMemo(dateKey);
+        memoInput.value = memo || '';
+        
+        // 显示模态框
+        memoModal.classList.add('active');
+        memoInput.focus();
+    }
 }
 
 /**
@@ -130,13 +139,19 @@ function bindNavigationEvents() {
  */
 function openWeeklyMemoEditor() {
     const weekKey = Utils.formatWeekKey(CalendarEngine.currentDate);
-    const memo = MemoManager.getWeeklyMemo(weekKey);
+    const mode = MemoManager.getWeeklyMode(weekKey);
     
-    const weeklyMemoInput = document.getElementById('weeklyMemoInput');
-    weeklyMemoInput.value = memo || '';
-    
-    weeklyMemoModal.classList.add('active');
-    weeklyMemoInput.focus();
+    // 根据模式打开不同的编辑器
+    if (mode === 'plan') {
+        PlanManager.openWeeklyPlan(weekKey);
+    } else {
+        const weeklyMemoInput = document.getElementById('weeklyMemoInput');
+        const memo = MemoManager.getWeeklyMemo(weekKey);
+        weeklyMemoInput.value = memo || '';
+        
+        weeklyMemoModal.classList.add('active');
+        weeklyMemoInput.focus();
+    }
 }
 
 /**

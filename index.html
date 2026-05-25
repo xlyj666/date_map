@@ -62,7 +62,7 @@
         </footer>
     </div>
 
-    <!-- 备忘录编辑模态框 -->
+    <!-- 备忘录/计划编辑模态框 -->
     <div id="memoModal" class="modal">
         <div class="modal-content">
             <div class="modal-header">
@@ -70,20 +70,52 @@
                 <button id="closeModal" class="close-btn">&times;</button>
             </div>
             <div class="modal-body">
-                <textarea id="memoInput" placeholder="在此输入备忘录内容..." rows="8"></textarea>
-                <div class="memo-info">
-                    <small>内容将自动保存到本地存储</small>
+                <!-- 模式切换器 -->
+                <div class="mode-switcher" id="dailyModeSwitcher">
+                    <button class="mode-btn active" data-mode="memo">📝 备忘录模式</button>
+                    <button class="mode-btn" data-mode="plan">✅ 计划模式</button>
+                </div>
+
+                <!-- 备忘录模式容器 -->
+                <div id="memoModeContainer" class="memo-mode-container">
+                    <textarea id="memoInput" placeholder="在此输入备忘录内容..." rows="8"></textarea>
+                    <div class="memo-info">
+                        <small>内容将自动保存到本地存储</small>
+                    </div>
+                </div>
+
+                <!-- 计划模式容器 -->
+                <div id="planModeContainer" class="plan-mode-container hidden">
+                    <!-- 添加新任务 -->
+                    <div class="plan-input-container">
+                        <input type="text" id="planInput" class="plan-input" placeholder="添加新计划...">
+                        <button id="addPlanBtn" class="add-plan-btn">添加</button>
+                    </div>
+
+                    <!-- 当日计划列表 -->
+                    <div id="dailyPlanList" class="plan-list"></div>
+
+                    <!-- 未完成清单 -->
+                    <div class="unfinished-section">
+                        <div class="unfinished-header">
+                            <h4>📋 未完成清单</h4>
+                        </div>
+                        <div id="unfinishedList" class="unfinished-list"></div>
+                    </div>
                 </div>
             </div>
-            <div class="modal-footer">
+            <div class="modal-footer" id="memoModalFooter">
                 <button id="deleteMemo" class="delete-btn">删除</button>
                 <button id="cancelBtn" class="cancel-btn">取消</button>
                 <button id="saveBtn" class="save-btn">保存</button>
             </div>
+            <div class="modal-footer hidden" id="planModalFooter">
+                <button id="closePlanBtn" class="cancel-btn">关闭</button>
+            </div>
         </div>
     </div>
 
-    <!-- 周备忘录编辑模态框 -->
+    <!-- 周备忘录/计划编辑模态框 -->
     <div id="weeklyMemoModal" class="modal">
         <div class="modal-content">
             <div class="modal-header">
@@ -91,21 +123,55 @@
                 <button id="closeWeeklyModal" class="close-btn">&times;</button>
             </div>
             <div class="modal-body">
-                <textarea id="weeklyMemoInput" placeholder="在此输入本周备忘录..." rows="8"></textarea>
-                <div class="memo-info">
-                    <small>内容将自动保存到本地存储</small>
+                <!-- 模式切换器 -->
+                <div class="mode-switcher" id="weeklyModeSwitcher">
+                    <button class="mode-btn active" data-mode="memo">📝 备忘录模式</button>
+                    <button class="mode-btn" data-mode="plan">✅ 计划模式</button>
+                </div>
+
+                <!-- 备忘录模式容器 -->
+                <div id="weeklyMemoModeContainer" class="memo-mode-container">
+                    <textarea id="weeklyMemoInput" placeholder="在此输入本周备忘录..." rows="8"></textarea>
+                    <div class="memo-info">
+                        <small>内容将自动保存到本地存储</small>
+                    </div>
+                </div>
+
+                <!-- 周计划模式容器 -->
+                <div id="weeklyPlanModeContainer" class="plan-mode-container hidden">
+                    <!-- 添加新任务 -->
+                    <div class="plan-input-container">
+                        <input type="text" id="weeklyPlanInput" class="plan-input" placeholder="添加本周计划...">
+                        <button id="addWeeklyPlanBtn" class="add-plan-btn">添加</button>
+                    </div>
+
+                    <!-- 周计划列表 -->
+                    <div id="weeklyPlanList" class="plan-list"></div>
+
+                    <!-- 周未完成清单 -->
+                    <div class="unfinished-section">
+                        <div class="unfinished-header">
+                            <h4>📋 本周未完成清单</h4>
+                        </div>
+                        <div id="weeklyUnfinishedList" class="unfinished-list"></div>
+                    </div>
                 </div>
             </div>
-            <div class="modal-footer">
+            <div class="modal-footer" id="weeklyMemoModalFooter">
                 <button id="deleteWeeklyMemo" class="delete-btn">删除</button>
                 <button id="cancelWeeklyBtn" class="cancel-btn">取消</button>
                 <button id="saveWeeklyBtn" class="save-btn">保存</button>
             </div>
+            <div class="modal-footer hidden" id="weeklyPlanModalFooter">
+                <button id="closeWeeklyPlanBtn" class="cancel-btn">关闭</button>
+            </div>
         </div>
     </div>
 
+    <script src="js/storage.js"></script>
     <script src="js/utils.js"></script>
     <script src="js/memo.js"></script>
+    <script src="js/plan.js"></script>
     <script src="js/calendar.js"></script>
     <script src="js/app.js"></script>
 </body>

@@ -530,3 +530,268 @@ body {
         display: none;
     }
 }
+
+/* ========== 计划模式样式 ========== */
+
+/* 模式切换器 */
+.mode-switcher {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 15px;
+}
+
+.mode-btn {
+    flex: 1;
+    padding: 10px 15px;
+    border: 2px solid var(--cream-orange);
+    background: var(--cream-yellow-light);
+    color: var(--text-primary);
+    border-radius: var(--radius-small);
+    cursor: pointer;
+    font-weight: 600;
+    transition: all var(--transition-fast);
+}
+
+.mode-btn.active {
+    background: var(--accent-orange);
+    color: white;
+    border-color: var(--accent-orange);
+}
+
+.mode-btn:hover:not(.active) {
+    background: var(--cream-orange);
+}
+
+/* 计划列表容器 */
+.plan-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.plan-item {
+    display: flex;
+    align-items: center;
+    padding: 12px 15px;
+    background: var(--day-bg);
+    border: 2px solid var(--cream-yellow);
+    border-radius: var(--radius-medium);
+    margin-bottom: 10px;
+    transition: all var(--transition-fast);
+}
+
+.plan-item:hover {
+    border-color: var(--cream-orange);
+    box-shadow: var(--shadow-soft);
+}
+
+.plan-item.completed {
+    background: #f0f0f0;
+    opacity: 0.7;
+}
+
+.plan-item.completed .plan-content {
+    text-decoration: line-through;
+    color: var(--text-light);
+}
+
+/* 完成状态圆圈 */
+.plan-checkbox {
+    width: 24px;
+    height: 24px;
+    border: 2px solid var(--accent-orange);
+    border-radius: 50%;
+    margin-right: 15px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all var(--transition-fast);
+    flex-shrink: 0;
+}
+
+.plan-checkbox:hover {
+    background: var(--cream-yellow);
+    transform: scale(1.1);
+}
+
+.plan-checkbox.checked {
+    background: var(--accent-orange);
+}
+
+.plan-checkbox.checked::after {
+    content: '✓';
+    color: white;
+    font-size: 1rem;
+    font-weight: bold;
+}
+
+/* 计划内容 */
+.plan-content {
+    flex: 1;
+    color: var(--text-primary);
+    line-height: 1.5;
+}
+
+/* 计划操作按钮 */
+.plan-actions {
+    display: flex;
+    gap: 8px;
+    margin-left: 10px;
+}
+
+.plan-action-btn {
+    width: 30px;
+    height: 30px;
+    border: none;
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all var(--transition-fast);
+    font-size: 0.9rem;
+}
+
+.plan-action-btn.unfinished {
+    background: var(--cream-orange);
+    color: var(--text-primary);
+}
+
+.plan-action-btn.unfinished:hover {
+    background: var(--accent-orange);
+    color: white;
+}
+
+.plan-action-btn.delete {
+    background: #ffcccc;
+    color: #cc0000;
+}
+
+.plan-action-btn.delete:hover {
+    background: #ff6b6b;
+    color: white;
+}
+
+/* 未完成清单区域 */
+.unfinished-section {
+    margin-top: 20px;
+    padding: 20px;
+    background: var(--cream-yellow-light);
+    border-radius: var(--radius-medium);
+    border: 2px dashed var(--cream-orange);
+}
+
+.unfinished-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+}
+
+.unfinished-header h4 {
+    color: var(--text-primary);
+    font-size: 1.1rem;
+}
+
+.unfinished-list {
+    min-height: 50px;
+}
+
+.unfinished-item {
+    display: flex;
+    align-items: center;
+    padding: 10px 15px;
+    background: var(--card-bg);
+    border: 2px solid var(--cream-yellow);
+    border-radius: var(--radius-small);
+    margin-bottom: 8px;
+    cursor: grab;
+    transition: all var(--transition-fast);
+}
+
+.unfinished-item:hover {
+    border-color: var(--accent-orange);
+    box-shadow: var(--shadow-soft);
+}
+
+.unfinished-item:active {
+    cursor: grabbing;
+}
+
+.unfinished-item .plan-content {
+    flex: 1;
+}
+
+/* 拖拽提示 */
+.drag-hint {
+    color: var(--text-light);
+    font-size: 0.85rem;
+    font-style: italic;
+    text-align: center;
+    padding: 10px;
+}
+
+/* 计划模式输入框 */
+.plan-input-container {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 15px;
+}
+
+.plan-input {
+    flex: 1;
+    padding: 10px 15px;
+    border: 2px solid var(--cream-yellow);
+    border-radius: var(--radius-small);
+    font-size: 1rem;
+    font-family: inherit;
+}
+
+.plan-input:focus {
+    outline: none;
+    border-color: var(--accent-orange);
+}
+
+.add-plan-btn {
+    padding: 10px 20px;
+    background: var(--accent-orange);
+    color: white;
+    border: none;
+    border-radius: var(--radius-small);
+    cursor: pointer;
+    font-weight: 600;
+    transition: all var(--transition-fast);
+}
+
+.add-plan-btn:hover {
+    background: var(--accent-hover);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-hover);
+}
+
+/* 空状态提示 */
+.empty-state {
+    text-align: center;
+    padding: 30px 20px;
+    color: var(--text-light);
+}
+
+.empty-state-icon {
+    font-size: 3rem;
+    margin-bottom: 10px;
+}
+
+/* 模态框中的计划模式容器 */
+.plan-mode-container {
+    min-height: 300px;
+}
+
+.memo-mode-container {
+    min-height: 300px;
+}
+
+/* 隐藏/显示控制 */
+.hidden {
+    display: none !important;
+}

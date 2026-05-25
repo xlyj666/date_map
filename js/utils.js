@@ -227,5 +227,82 @@ const Utils = {
         } catch (error) {
             return false;
         }
+    },
+
+    /**
+     * 检测是否在 Electron 环境中
+     * @returns {boolean} 是否在 Electron 中
+     */
+    isElectron() {
+        return typeof window !== 'undefined' && window.electronAPI;
+    },
+
+    /**
+     * 保存到存储（自动选择 localStorage 或文件存储）
+     * 同步方法 - 在 Electron 中使用缓存，异步写入文件
+     * @param {string} key - 存储键名
+     * @param {any} data - 存储数据
+     */
+    saveToStorage(key, data) {
+        if (this.isElectron()) {
+            // Electron 环境：使用 storage.js 的同步接口
+            if (window.StorageAdapter) {
+                window.StorageAdapter.setAll(data);
+                return true;
+            }
+            // 如果没有 StorageAdapter，使用异步方式（兼容旧代码）
+            if (window.electronAPI) {
+                window.electronAPI.writeCalendarData(data).catch(err => {
+                    console.error('保存数据失败:', err);
+                });
+                return true;
+            }
+        } else {
+            // 浏览器环境：使用 localStorage
+            try {
+                localStorage.setItem(key, JSON.stringify(data));
+                return true;
+            } catch (error) {
+                console.error('保存数据失败:', error);
+                return false;
+            }
+        }
+    },
+
+    /**
+     * 从存储加载（自动选择 localStorage 或文件存储）
+     * 同步方法 - 在 Electron 中从缓存读取
+     * @param {string} key - 存储键名
+     * @returns {any|null} 读取的数据，失败返回 null
+     */
+    loadFromStorage(key) {
+        if (this.isElectron()) {
+            // Electron 环境：使用 storage.js 的同步接口
+            if (window.StorageAdapter) {
+                return window.StorageAdapter.getAll();
+            }
+            // 如果没有 StorageAdapter，返回 null（兼容旧代码）
+            return null;
+        } else {
+            // 浏览器环境：使用 localStorage
+            try {
+                const data = localStorage.getItem(key);
+                return data ? JSON.parse(data) : null;
+            } catch (error) {
+                console.error('读取数据失败:', error);
+                return null;
+            }
+        }
+    },
+
+    /**
+     * 获取数据文件路径（仅 Electron 环境）
+     * @returns {Promise<string>} 文件路径
+     */
+    async getDataFilePath() {
+        if (this.isElectron() && window.electronAPI) {
+            return await window.electronAPI.getDataFilePath();
+        }
+        return null;
     }
 };

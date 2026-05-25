@@ -1,16 +1,66 @@
+# 依赖目录
+node_modules/
+npm-debug.log
+yarn-error.log
+
+# 构建产物（保留安装程序，忽略便携版）
+dist/
+out/
+dist/*.zip
+dist/*.tar.gz
+dist/*.AppImage
+dist/*.deb
+dist/*.rpm
+dist/*.snap
+dist/win-unpacked/
+dist/mac/
+dist/linux-unpacked/
+
+# Electron 打包文件（保留 NSIS 安装程序）
+!dist/*Setup*.exe
+*.dmg
+
+# 应用数据文件（不上传到 Git）
+calendar_data.json
+*.json.backup
+
 # 系统文件
 .DS_Store
 Thumbs.db
+desktop.ini
+$RECYCLE.BIN/
 
-# IDE 配置
+# IDE 和编辑器
 .vscode/
 .idea/
+*.sublime-project
+*.sublime-workspace
 *.swp
 *.swo
 *~
+*.tmp
 
 # 日志文件
 *.log
+logs/
 
 # 临时文件
 *.tmp
+*.temp
+
+# Electron Builder 缓存
+.cache/
+electron-builder-cache/
+
+# 打包配置生成的文件
+builder-effective-config.yaml
+builder-debug.yml
+latest.yml
+
+# 测试覆盖率
+coverage/
+
+# 环境变量文件
+.env
+.env.local
+.env.*.local
