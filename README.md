@@ -2,7 +2,7 @@
 
 一个简洁优雅的桌面日历应用，支持备忘录和计划模式，帮助你高效管理时间和任务。
 
-![版本](https://img.shields.io/badge/版本 -1.0.0-blue)
+![版本](https://img.shields.io/badge/版本-1.0.0-blue)
 ![平台](https://img.shields.io/badge/平台-Windows-lightgrey)
 ![Electron](https://img.shields.io/badge/Electron-28.3.3-47848F?logo=electron)
 
