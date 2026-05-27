@@ -419,20 +419,39 @@ const PlanManager = {
         
         if (type === 'daily') {
             MemoManager.deleteDailyTask(this.currentDateKey, taskId);
-            this.renderDailyPlanList();
+            // save() 会触发 dataRefreshed 事件，自动刷新 UI
         } else if (type === 'weekly') {
             MemoManager.deleteWeeklyTask(this.currentWeekKey, taskId);
-            this.renderWeeklyPlanList();
+            // save() 会触发 dataRefreshed 事件，自动刷新 UI
         } else if (type === 'unfinished') {
             MemoManager.deleteUnfinishedTask(taskId);
-            this.renderUnfinishedList();
-            this.renderWeeklyUnfinishedList();
+            // save() 会触发 dataRefreshed 事件，自动刷新 UI
         } else if (type === 'weeklyUnfinished') {
             MemoManager.deleteWeeklyUnfinishedTask(taskId);
-            this.renderWeeklyUnfinishedList();
+            // save() 会触发 dataRefreshed 事件，自动刷新 UI
         }
         
         showToast('任务已删除');
+        
+        // 重新聚焦输入框（如果是日计划）
+        if (type === 'unfinished' || type === 'daily') {
+            setTimeout(() => {
+                const input = document.getElementById('planInput');
+                if (input) {
+                    input.focus();
+                }
+            }, 100);
+        }
+        
+        // 重新聚焦输入框（如果是周计划）
+        if (type === 'weeklyUnfinished' || type === 'weekly') {
+            setTimeout(() => {
+                const input = document.getElementById('weeklyPlanInput');
+                if (input) {
+                    input.focus();
+                }
+            }, 100);
+        }
     },
 
     /**

@@ -20,16 +20,29 @@ const MemoManager = {
     /**
      * 初始化备忘录管理器
      */
-    init() {
-        this.load();
+    async init() {
+        DataDebugger.log('MemoManager', '🚀 初始化开始', null, 'init');
+        
+        // 等待 StorageAdapter 加载完成
+        if (window.StorageAdapter && window.StorageAdapter.waitForLoad) {
+            DataDebugger.log('MemoManager', '⏳ 等待 StorageAdapter 加载完成...', null, 'init');
+            await window.StorageAdapter.waitForLoad();
+            DataDebugger.log('MemoManager', '✅ StorageAdapter 加载完成', null, 'init');
+        }
+        
+        await this.load();
     },
 
     /**
      * 从本地存储加载数据
      */
-    load() {
-        const stored = Utils.loadFromStorage(this.STORAGE_KEY);
+    async load() {
+        DataDebugger.log('MemoManager', '📖 开始加载数据', null, 'load');
+        
+        const stored = await Utils.loadFromStorage(this.STORAGE_KEY);
+        
         if (stored) {
+            DataDebugger.logRead('MemoManager', 'Utils', stored, 'load');
             this.data = {
                 dailyMemos: stored.dailyMemos || {},
                 weeklyMemos: stored.weeklyMemos || {},
@@ -38,7 +51,50 @@ const MemoManager = {
                 weeklyPlans: stored.weeklyPlans || {},
                 weeklyUnfinishedTasks: stored.weeklyUnfinishedTasks || { global: { tasks: [] } }
             };
+            DataDebugger.log('MemoManager', '✅ 数据加载完成', this.data, 'load');
+        } else {
+            DataDebugger.log('MemoManager', '⚠️ 无存储数据，使用默认数据', null, 'load');
         }
+        
+        // 确保未完成清单存在
+        if (!this.data.unfinishedTasks.global) {
+            this.data.unfinishedTasks.global = { tasks: [] };
+        }
+        if (!this.data.weeklyUnfinishedTasks.global) {
+            this.data.weeklyUnfinishedTasks.global = { tasks: [] };
+        }
+        
+        DataDebugger.validate(this.data, 'MemoManager');
+    },
+
+    /**
+     * 重新从文件加载数据（用于保存后刷新）
+     */
+    async reload() {
+        DataDebugger.log('MemoManager', '🔄 重新加载数据...', null, 'reload');
+        
+        // 等待 StorageAdapter 加载完成
+        if (window.StorageAdapter && window.StorageAdapter.waitForLoad) {
+            await window.StorageAdapter.waitForLoad();
+        }
+        
+        const stored = await Utils.loadFromStorage(this.STORAGE_KEY);
+        
+        if (stored) {
+            DataDebugger.logRead('MemoManager', 'Utils', stored, 'reload');
+            this.data = {
+                dailyMemos: stored.dailyMemos || {},
+                weeklyMemos: stored.weeklyMemos || {},
+                dailyPlans: stored.dailyPlans || {},
+                unfinishedTasks: stored.unfinishedTasks || { global: { tasks: [] } },
+                weeklyPlans: stored.weeklyPlans || {},
+                weeklyUnfinishedTasks: stored.weeklyUnfinishedTasks || { global: { tasks: [] } }
+            };
+            DataDebugger.log('MemoManager', '✅ 重新加载完成', this.data, 'reload');
+        } else {
+            DataDebugger.log('MemoManager', '⚠️ 重新加载失败，使用当前数据', null, 'reload');
+        }
+        
         // 确保未完成清单存在
         if (!this.data.unfinishedTasks.global) {
             this.data.unfinishedTasks.global = { tasks: [] };
@@ -49,10 +105,25 @@ const MemoManager = {
     },
 
     /**
-     * 保存数据到本地存储
+     * 保存数据到本地存储，保存后重新加载以确保与文件一致
      */
-    save() {
-        Utils.saveToStorage(this.STORAGE_KEY, this.data);
+    async save() {
+        DataDebugger.logWrite('MemoManager', 'Utils', this.data, 'save');
+        
+        // 先保存当前数据
+        await Utils.saveToStorage(this.STORAGE_KEY, this.data);
+        
+        // 等待一小段时间让文件写入完成
+        await new Promise(resolve => setTimeout(resolve, 100));
+        
+        // 重新从文件加载数据
+        DataDebugger.log('MemoManager', '🔄 保存后重新加载数据...', null, 'save');
+        await this.reload();
+        
+        // 触发数据刷新事件，通知 UI 更新
+        window.dispatchEvent(new CustomEvent('dataRefreshed'));
+        
+        DataDebugger.log('MemoManager', '✅ 数据保存并重新加载完成', this.data, 'save');
     },
 
     /**
@@ -195,7 +266,9 @@ const MemoManager = {
      * @returns {Array} 任务数组
      */
     getDailyTasks(dateKey) {
-        return this.data.dailyPlans[dateKey]?.tasks || [];
+        const tasks = this.data.dailyPlans[dateKey]?.tasks || [];
+        // 返回深拷贝，避免直接修改缓存
+        return JSON.parse(JSON.stringify(tasks));
     },
 
     /**
@@ -356,7 +429,9 @@ const MemoManager = {
      * @returns {Array} 任务数组
      */
     getWeeklyTasks(weekKey) {
-        return this.data.weeklyPlans[weekKey]?.tasks || [];
+        const tasks = this.data.weeklyPlans[weekKey]?.tasks || [];
+        // 返回深拷贝，避免直接修改缓存
+        return JSON.parse(JSON.stringify(tasks));
     },
 
     /**

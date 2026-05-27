@@ -18,8 +18,8 @@ contextBridge.exposeInMainWorld('electronAPI', {
     restoreData: (backupPath) => ipcRenderer.invoke('calendar-data:restore', backupPath),
     
     // 应用信息
-    getAppVersion: () => process.version,
+    getAppVersion: () => ipcRenderer.invoke('app:getVersion'),
     
     // 平台信息
-    getPlatform: () => process.platform
+    getPlatform: () => ipcRenderer.invoke('app:getPlatform')
 });

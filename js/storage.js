@@ -1,12 +1,17 @@
 /**
  * 存储适配器模块
  * 自动检测运行环境（Electron 或浏览器），提供统一的同步存储接口
- * 无需修改现有代码即可在两种环境中运行
  */
 
 const StorageAdapter = {
     // 缓存数据
     _cache: null,
+    
+    // 加载完成标志
+    _loaded: false,
+    
+    // 加载 Promise
+    _loadPromise: null,
     
     // 存储键名
     _storageKey: 'calendar-app-data',
@@ -25,34 +30,49 @@ const StorageAdapter = {
      */
     init() {
         if (this.isElectron()) {
-            // Electron 环境：从文件加载数据到缓存
-            this._loadFromDisk();
+            // 开始异步加载
+            this._loadPromise = this._loadFromDisk();
+        } else {
+            this._loaded = true;
         }
     },
     
     /**
-     * 从磁盘加载数据（Electron 环境）
+     * 从磁盘加载数据
      */
-    _loadFromDisk() {
-        if (window.electronAPI && window.electronAPI.readCalendarData) {
-            window.electronAPI.readCalendarData().then(data => {
-                this._cache = data;
-                console.log('已从文件加载数据:', data);
-            }).catch(err => {
-                console.error('加载数据失败:', err);
-                this._cache = this._getDefaultData();
-            });
+    async _loadFromDisk() {
+        DataDebugger.log('StorageAdapter', '🚀 开始从磁盘加载数据', null, '_loadFromDisk');
+        
+        try {
+            const data = await window.electronAPI.readCalendarData();
+            DataDebugger.logRead('StorageAdapter', 'Electron IPC', data, '_loadFromDisk.then');
+            this._cache = data;
+            this._loaded = true;
+            DataDebugger.log('StorageAdapter', '✅ 数据加载完成', this._cache, '_loadFromDisk.then');
+            DataDebugger.validate(this._cache, 'StorageAdapter');
+            return data;
+        } catch (error) {
+            DataDebugger.logError('StorageAdapter', error, '_loadFromDisk.catch');
+            this._cache = this._getDefaultData();
+            this._loaded = true;
+            return this._cache;
         }
     },
     
     /**
-     * 保存数据到磁盘（Electron 环境）
+     * 保存数据到磁盘
      */
     _saveToDisk() {
         if (this._cache && window.electronAPI && window.electronAPI.writeCalendarData) {
-            window.electronAPI.writeCalendarData(this._cache).catch(err => {
-                console.error('保存数据失败:', err);
-            });
+            DataDebugger.logWrite('StorageAdapter', 'Electron IPC', this._cache, '_saveToDisk');
+            
+            window.electronAPI.writeCalendarData(this._cache)
+                .then(() => {
+                    DataDebugger.log('StorageAdapter', '✅ 数据保存成功', null, '_saveToDisk.then');
+                })
+                .catch(err => {
+                    DataDebugger.logError('StorageAdapter', err, '_saveToDisk.catch');
+                });
         }
     },
     
@@ -71,19 +91,13 @@ const StorageAdapter = {
     },
     
     /**
-     * 获取数据（同步方法）
-     * @param {string} key - 数据键名
-     * @returns {any} 数据
+     * 获取数据
      */
     get(key) {
         if (this.isElectron()) {
-            // Electron 环境：从缓存读取
-            if (!this._cache) {
-                this._cache = this._getDefaultData();
-            }
-            return this._cache[key];
+            const cache = this._cache || this._getDefaultData();
+            return cache[key];
         } else {
-            // 浏览器环境：从 localStorage 读取
             try {
                 const data = localStorage.getItem(this._storageKey);
                 if (data) {
@@ -98,23 +112,17 @@ const StorageAdapter = {
     },
     
     /**
-     * 设置数据（同步方法）
-     * @param {string} key - 数据键名
-     * @param {any} value - 数据值
+     * 设置数据
      */
     set(key, value) {
         if (this.isElectron()) {
-            // Electron 环境：更新缓存并保存到文件
             if (!this._cache) {
                 this._cache = this._getDefaultData();
             }
             this._cache[key] = value;
-            // 异步保存到磁盘，不阻塞主线程
             setTimeout(() => this._saveToDisk(), 0);
         } else {
-            // 浏览器环境：使用 localStorage
             try {
-                const currentData = this.get(key);
                 const allData = {
                     dailyMemos: key === 'dailyMemos' ? value : this.get('dailyMemos'),
                     weeklyMemos: key === 'weeklyMemos' ? value : this.get('weeklyMemos'),
@@ -132,9 +140,11 @@ const StorageAdapter = {
     
     /**
      * 获取完整数据对象
-     * @returns {Object} 完整数据
      */
-    getAll() {
+    async getAll() {
+        // 等待数据加载完成
+        await this.waitForLoad();
+        
         if (this.isElectron()) {
             return this._cache || this._getDefaultData();
         } else {
@@ -150,11 +160,11 @@ const StorageAdapter = {
     
     /**
      * 设置完整数据对象
-     * @param {Object} data - 完整数据
      */
     setAll(data) {
         if (this.isElectron()) {
             this._cache = data || this._getDefaultData();
+            this._loaded = true;
             setTimeout(() => this._saveToDisk(), 0);
         } else {
             try {
@@ -166,14 +176,31 @@ const StorageAdapter = {
     },
     
     /**
-     * 强制立即保存到磁盘（用于重要操作后）
+     * 强制立即保存
      */
     flush() {
         if (this.isElectron() && this._cache) {
             this._saveToDisk();
         }
+    },
+    
+    /**
+     * 等待数据加载完成
+     */
+    async waitForLoad() {
+        if (this._loaded) {
+            return this._cache || this._getDefaultData();
+        }
+        
+        if (this._loadPromise) {
+            return await this._loadPromise;
+        }
+        
+        return this._getDefaultData();
     }
 };
 
-// 自动初始化
-StorageAdapter.init();
+// 暴露到全局作用域
+if (typeof window !== 'undefined') {
+    window.StorageAdapter = StorageAdapter;
+}

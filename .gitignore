@@ -26,6 +26,7 @@ $RECYCLE.BIN/
 # 日志文件
 *.log
 logs/
+app.log
 
 # 临时文件
 *.tmp

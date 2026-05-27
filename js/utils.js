@@ -244,16 +244,20 @@ const Utils = {
      * @param {any} data - 存储数据
      */
     saveToStorage(key, data) {
+        DataDebugger.logWrite('Utils', key, data, 'saveToStorage');
+        
         if (this.isElectron()) {
             // Electron 环境：使用 storage.js 的同步接口
             if (window.StorageAdapter) {
+                DataDebugger.logTransform('Utils', 'data', 'StorageAdapter.setAll', 'saveToStorage');
                 window.StorageAdapter.setAll(data);
                 return true;
             }
             // 如果没有 StorageAdapter，使用异步方式（兼容旧代码）
             if (window.electronAPI) {
+                DataDebugger.logWrite('Utils', 'Electron IPC (fallback)', data, 'saveToStorage');
                 window.electronAPI.writeCalendarData(data).catch(err => {
-                    console.error('保存数据失败:', err);
+                    DataDebugger.logError('Utils', err, 'saveToStorage.catch');
                 });
                 return true;
             }
@@ -261,9 +265,10 @@ const Utils = {
             // 浏览器环境：使用 localStorage
             try {
                 localStorage.setItem(key, JSON.stringify(data));
+                DataDebugger.logWrite('Utils', 'localStorage', data, 'saveToStorage');
                 return true;
             } catch (error) {
-                console.error('保存数据失败:', error);
+                DataDebugger.logError('Utils', error, 'saveToStorage');
                 return false;
             }
         }
@@ -271,25 +276,32 @@ const Utils = {
 
     /**
      * 从存储加载（自动选择 localStorage 或文件存储）
-     * 同步方法 - 在 Electron 中从缓存读取
+     * 异步方法 - 在 Electron 中等待缓存加载后读取
      * @param {string} key - 存储键名
-     * @returns {any|null} 读取的数据，失败返回 null
+     * @returns {Promise<any|null>} 读取的数据，失败返回 null
      */
-    loadFromStorage(key) {
+    async loadFromStorage(key) {
+        DataDebugger.logRead('Utils', key, null, 'loadFromStorage');
+        
         if (this.isElectron()) {
-            // Electron 环境：使用 storage.js 的同步接口
+            // Electron 环境：使用 storage.js 的异步接口
             if (window.StorageAdapter) {
-                return window.StorageAdapter.getAll();
+                const data = await window.StorageAdapter.getAll();
+                DataDebugger.logRead('Utils', 'StorageAdapter', data, 'loadFromStorage');
+                return data;
             }
             // 如果没有 StorageAdapter，返回 null（兼容旧代码）
+            DataDebugger.logError('Utils', 'StorageAdapter 不可用', 'loadFromStorage');
             return null;
         } else {
             // 浏览器环境：使用 localStorage
             try {
                 const data = localStorage.getItem(key);
-                return data ? JSON.parse(data) : null;
+                const parsed = data ? JSON.parse(data) : null;
+                DataDebugger.logRead('Utils', 'localStorage', parsed, 'loadFromStorage');
+                return parsed;
             } catch (error) {
-                console.error('读取数据失败:', error);
+                DataDebugger.logError('Utils', error, 'loadFromStorage');
                 return null;
             }
         }

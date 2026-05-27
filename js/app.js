@@ -14,38 +14,73 @@ const weeklyMemoModal = document.getElementById('weeklyMemoModal');
 /**
  * 初始化应用
  */
-function initApp() {
-    // 初始化备忘录管理器
-    MemoManager.init();
-
+async function initApp() {
+    // 先初始化 StorageAdapter
+    console.log('🔧 初始化 StorageAdapter...');
+    if (window.StorageAdapter) {
+        window.StorageAdapter.init();
+        console.log('✅ StorageAdapter 初始化完成');
+    } else {
+        console.error('❌ StorageAdapter 不可用！');
+    }
+    
+    // 等待备忘录管理器初始化完成（会等待 StorageAdapter 加载）
+    await MemoManager.init();
+    
     // 初始化计划管理器
     PlanManager.init();
-
+    
     // 初始化日历引擎
     const calendarGrid = document.getElementById('calendarGrid');
     CalendarEngine.init(calendarGrid, handleDayClick);
-
+    
     // 渲染日历
     CalendarEngine.render();
-
+    
     // 更新周备忘录显示
     updateWeeklyMemoDisplay();
-
+    
     // 更新时间显示
     updateTimeDisplay();
     setInterval(updateTimeDisplay, 1000);
-
+    
     // 绑定导航事件
     bindNavigationEvents();
-
+    
     // 绑定模态框事件
     bindModalEvents();
-
+    
+    // 监听数据刷新事件，自动重新渲染界面
+    window.addEventListener('dataRefreshed', () => {
+        console.log('========================================');
+        console.log('📊 检测到数据刷新，重新渲染界面...');
+        console.log('📊 当前时间:', new Date().toLocaleString('zh-CN'));
+        console.log('📊 触发日历刷新...');
+        CalendarEngine.refresh();
+        console.log('📊 更新周备忘录显示...');
+        updateWeeklyMemoDisplay();
+        
+        // 始终刷新每日计划列表和未完成清单
+        console.log('📊 刷新日计划列表...');
+        PlanManager.renderDailyPlanList();
+        console.log('📊 刷新未完成清单...');
+        PlanManager.renderUnfinishedList();
+        
+        // 始终刷新周计划列表和周未完成清单
+        console.log('📊 刷新周计划列表...');
+        PlanManager.renderWeeklyPlanList();
+        console.log('📊 刷新周未完成清单...');
+        PlanManager.renderWeeklyUnfinishedList();
+        
+        console.log('✅ 界面刷新完成');
+        console.log('========================================');
+    });
+    
     // 检查 localStorage 可用性
     if (!Utils.isStorageAvailable()) {
         alert('警告：您的浏览器不支持本地存储，数据可能无法保存！');
     }
-
+    
     console.log('轻量级日历初始化完成！');
 }
 
@@ -58,21 +93,57 @@ function handleDayClick(date) {
     const dateKey = Utils.formatDate(date);
     const mode = MemoManager.getDailyMode(dateKey);
     
-    // 根据模式打开不同的编辑器
+    // 设置模态框标题
+    const modalTitle = document.getElementById('modalTitle');
+    modalTitle.textContent = `${Utils.formatDate(date)} ${Utils.getWeekdayName(date)} - ${mode === 'plan' ? '计划' : '备忘录'}`;
+    
+    // 设置模式切换器状态
+    const switcher = document.getElementById('dailyModeSwitcher');
+    const buttons = switcher.querySelectorAll('.mode-btn');
+    buttons.forEach(btn => {
+        if (btn.dataset.mode === mode) {
+            btn.classList.add('active');
+        } else {
+            btn.classList.remove('active');
+        }
+    });
+    
+    // 切换容器显示
+    const memoContainer = document.getElementById('memoModeContainer');
+    const planContainer = document.getElementById('planModeContainer');
+    const memoFooter = document.getElementById('memoModalFooter');
+    const planFooter = document.getElementById('planModalFooter');
+    
     if (mode === 'plan') {
-        PlanManager.openDailyPlan(date);
+        memoContainer.classList.add('hidden');
+        planContainer.classList.remove('hidden');
+        memoFooter.classList.add('hidden');
+        planFooter.classList.remove('hidden');
+        
+        // 设置当前日期键
+        PlanManager.currentDateKey = dateKey;
+        
+        // 渲染计划列表
+        PlanManager.renderDailyPlanList();
+        PlanManager.renderUnfinishedList();
     } else {
-        // 设置模态框标题
-        const modalTitle = document.getElementById('modalTitle');
-        modalTitle.textContent = `${Utils.formatDate(date)} ${Utils.getWeekdayName(date)} - 备忘录`;
+        // 清空当前日期键
+        PlanManager.currentDateKey = null;
+        memoContainer.classList.remove('hidden');
+        planContainer.classList.add('hidden');
+        memoFooter.classList.remove('hidden');
+        planFooter.classList.add('hidden');
         
         // 设置输入框内容
         const memoInput = document.getElementById('memoInput');
         const memo = MemoManager.getDailyMemo(dateKey);
         memoInput.value = memo || '';
-        
-        // 显示模态框
-        memoModal.classList.add('active');
+    }
+    
+    // 显示模态框
+    memoModal.classList.add('active');
+    if (mode === 'memo') {
+        const memoInput = document.getElementById('memoInput');
         memoInput.focus();
     }
 }
@@ -212,6 +283,8 @@ function bindModalEvents() {
 function closeMemoModal() {
     memoModal.classList.remove('active');
     selectedDate = null;
+    PlanManager.currentDateKey = null;
+    console.log('🚪 模态框关闭，清空 currentDateKey');
 }
 
 /**
@@ -219,6 +292,8 @@ function closeMemoModal() {
  */
 function closeWeeklyMemoModal() {
     weeklyMemoModal.classList.remove('active');
+    PlanManager.currentWeekKey = null;
+    console.log('🚪 周模态框关闭，清空 currentWeekKey');
 }
 
 /**

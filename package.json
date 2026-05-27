@@ -1,6 +1,6 @@
 {
   "name": "lightweight-calendar",
-  "version": "1.0.0",
+  "version": "1.0.5",
   "description": "轻量级日历应用 - 支持计划模式和备忘录功能",
   "main": "main.js",
   "scripts": {
@@ -36,7 +36,7 @@
     "win": {
       "target": [
         {
-          "target": "zip",
+          "target": "nsis",
           "arch": [
             "x64"
           ]
