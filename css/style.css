@@ -303,6 +303,53 @@ body {
     margin-top: 10px;
 }
 
+.no-plan {
+    color: var(--text-light);
+    font-size: 0.85rem;
+    font-style: italic;
+    margin-top: 5px;
+}
+
+.plan-indicator {
+    font-size: 0.75rem;
+    padding: 4px 8px;
+    border-radius: 12px;
+    display: inline-block;
+    margin-top: 5px;
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-weight: 600;
+    transition: all var(--transition-fast);
+}
+
+/* 计划指示器颜色档位（根据任务数量） */
+.plan-indicator[data-level="1"] {
+    background: #FFE4B5;
+    color: var(--text-primary);
+}
+
+.plan-indicator[data-level="2"] {
+    background: #FFD7A0;
+    color: var(--text-primary);
+}
+
+.plan-indicator[data-level="3"] {
+    background: #FFB347;
+    color: white;
+}
+
+.plan-indicator[data-level="4"] {
+    background: #FF8C42;
+    color: white;
+}
+
+.plan-indicator[data-level="5"] {
+    background: #FF6320;
+    color: white;
+}
+
 /* 页脚 */
 .footer {
     padding: 15px 30px;

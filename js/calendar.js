@@ -166,6 +166,37 @@ const CalendarEngine = {
             cell.appendChild(noMemo);
         }
 
+        // 检查计划模式并显示计划指示器
+        const planMode = MemoManager.getDailyMode(dateKey);
+        if (planMode === 'plan') {
+            const tasks = MemoManager.getDailyTasks(dateKey);
+            const unfinishedCount = tasks.filter(t => !t.completed).length;
+            
+            if (unfinishedCount === 0 && tasks.length === 0) {
+                // 无计划时，显示无计划提示（无底框）
+                const noPlan = document.createElement('div');
+                noPlan.className = 'no-plan';
+                noPlan.textContent = '无计划';
+                cell.appendChild(noPlan);
+            } else {
+                // 有计划时，根据任务数量显示不同颜色的指示器
+                const planIndicator = document.createElement('div');
+                planIndicator.className = 'plan-indicator';
+                
+                // 根据任务总数设置颜色档位（1-5 档）
+                const taskCount = tasks.length;
+                const level = Math.min(taskCount, 5); // 最多 5 档
+                planIndicator.dataset.level = level;
+                
+                if (unfinishedCount === 0) {
+                    planIndicator.textContent = '✅ 全部完成';
+                } else {
+                    planIndicator.textContent = `待完成：${unfinishedCount}`;
+                }
+                cell.appendChild(planIndicator);
+            }
+        }
+
         // 绑定点击事件
         cell.addEventListener('click', () => {
             if (this.onDayClick) {
