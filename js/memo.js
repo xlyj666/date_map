@@ -12,9 +12,9 @@ const MemoManager = {
         weeklyMemos: {},
         // 计划模式数据
         dailyPlans: {},           // 当日计划：{ 'YYYY-MM-DD': { tasks: [], mode: 'plan' } }
-        unfinishedTasks: {},      // 日未完成清单：{ 'global': { tasks: [] } } (所有日子共享)
+        unfinishedTasks: { global: { tasks: [] } },      // 日未完成清单：全局共享
         weeklyPlans: {},          // 周计划：{ 'YYYY-Www': { tasks: [], mode: 'plan' } }
-        weeklyUnfinishedTasks: {} // 周未完成清单：{ 'global': { tasks: [] } } (所有周共享)
+        weeklyUnfinishedTasks: { global: { tasks: [] } } // 周未完成清单：全局共享
     },
 
     /**
@@ -348,7 +348,7 @@ const MemoManager = {
         this.data.unfinishedTasks.global.tasks = 
             this.data.unfinishedTasks.global.tasks.filter(t => t.id !== taskId);
         
-        // 添加到未完成清单
+        // 添加到全局未完成清单
         this.data.unfinishedTasks.global.tasks.push(task);
         
         // 从日计划中删除
@@ -531,7 +531,7 @@ const MemoManager = {
         this.data.weeklyUnfinishedTasks.global.tasks = 
             this.data.weeklyUnfinishedTasks.global.tasks.filter(t => t.id !== taskId);
         
-        // 添加到周未完成清单
+        // 添加到全局周未完成清单
         this.data.weeklyUnfinishedTasks.global.tasks.push(task);
         
         // 从周计划中删除

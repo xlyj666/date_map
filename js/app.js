@@ -93,6 +93,9 @@ function handleDayClick(date) {
     const dateKey = Utils.formatDate(date);
     const mode = MemoManager.getDailyMode(dateKey);
     
+    // 无论什么模式，都先设置当前日期键
+    PlanManager.currentDateKey = dateKey;
+    
     // 设置模态框标题
     const modalTitle = document.getElementById('modalTitle');
     modalTitle.textContent = `${Utils.formatDate(date)} ${Utils.getWeekdayName(date)} - ${mode === 'plan' ? '计划' : '备忘录'}`;
@@ -120,15 +123,10 @@ function handleDayClick(date) {
         memoFooter.classList.add('hidden');
         planFooter.classList.remove('hidden');
         
-        // 设置当前日期键
-        PlanManager.currentDateKey = dateKey;
-        
         // 渲染计划列表
         PlanManager.renderDailyPlanList();
         PlanManager.renderUnfinishedList();
     } else {
-        // 清空当前日期键
-        PlanManager.currentDateKey = null;
         memoContainer.classList.remove('hidden');
         planContainer.classList.add('hidden');
         memoFooter.classList.remove('hidden');
@@ -283,8 +281,8 @@ function bindModalEvents() {
 function closeMemoModal() {
     memoModal.classList.remove('active');
     selectedDate = null;
-    PlanManager.currentDateKey = null;
-    console.log('🚪 模态框关闭，清空 currentDateKey');
+    // 不清空 currentDateKey，保持当前日期键以便下次使用
+    console.log('🚪 模态框关闭，保留 currentDateKey:', PlanManager.currentDateKey);
 }
 
 /**

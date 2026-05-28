@@ -104,7 +104,7 @@ const PlanManager = {
     /**
      * 编辑任务内容
      * @param {number} taskId - 任务 ID
-     * @param {string} type - 类型：'daily' 或 'weekly' 或 'unfinished'
+     * @param {string} type - 类型：'daily' 或 'weekly' 或 'unfinished' 或 'weeklyUnfinished'
      * @param {HTMLElement} contentElement - 内容 DOM 元素
      */
     editTaskContent(taskId, type, contentElement) {
@@ -148,6 +148,13 @@ const PlanManager = {
                         task.content = newText;
                         MemoManager.save();
                     }
+                } else if (type === 'weeklyUnfinished') {
+                    const tasks = MemoManager.getWeeklyUnfinishedTasks(this.currentWeekKey);
+                    const task = tasks.find(t => t.id === taskId);
+                    if (task) {
+                        task.content = newText;
+                        MemoManager.save();
+                    }
                 }
                 showToast('任务已更新');
             }
@@ -158,6 +165,8 @@ const PlanManager = {
                 this.renderWeeklyPlanList();
             } else if (type === 'unfinished') {
                 this.renderUnfinishedList();
+            } else if (type === 'weeklyUnfinished') {
+                this.renderWeeklyUnfinishedList();
             }
         };
         
@@ -370,10 +379,14 @@ const PlanManager = {
      * @param {number} taskId - 任务 ID
      */
     handleMoveToUnfinished(taskId) {
-        MemoManager.moveDailyTaskToUnfinished(this.currentDateKey, taskId);
-        this.renderDailyPlanList();
-        this.renderUnfinishedList();
-        showToast('已移到未完成清单');
+        const success = MemoManager.moveDailyTaskToUnfinished(this.currentDateKey, taskId);
+        if (success) {
+            this.renderDailyPlanList();
+            this.renderUnfinishedList();
+            showToast('已移到未完成清单');
+        } else {
+            showToast('移动任务失败');
+        }
     },
 
     /**
